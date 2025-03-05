@@ -1,59 +1,103 @@
 import { Router } from "express";
 import ProductManager from "../controllers/ProductManager.js";
 
-
 const routersProducts = Router();
-const PM = new ProductManager;
+const PM = new ProductManager();
 
-routersProducts.get("/",(req,res)=>{
-    const p = PM.getProducts();
-    res.send(p);  
-});
-routersProducts.get("/:id", (req, res) => {
-    const id = req.params.id;
-    let products = PM.getProductsById(id);
-    res.send(products)
-});
-
-
-routersProducts.post("/",(req,res)=>{
-    const {title,description,code,price,status,category,thumbnail} = req.body;
-    let prod ={title,description,code,price,status,category,thumbnail}
-    if (!title || !description || !code || !price || !category  || !status){
-
-        res.send({estado:'Error',mensaje:"todos los campos menos el de la imagen son obligatorios"})
-    }else{
-        !thumbnail ? prod.thumbnail = [] : prod.thumbnail = [thumbnail];
-        PM.addProduct(prod) ?  res.send({Error:'no se pudo guardar el producto'}) :  res.send({mensaje:'se guardo el producto '});
-        
+// Obtener todos los productos
+routersProducts.get("/", async (req, res) => {
+    try {
+        const products = await PM.getProducts();
+        res.json(products);
+    } catch (error) {
+        console.error("Error al obtener los productos:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
 });
 
-routersProducts.put("/:pid", (req, res) => {
-    const { pid } = req.params;
-    const newProductData = req.body;
+// Obtener un producto por ID
+routersProducts.get("/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const product = await PM.getProductsById(id);
 
-    const updatedProduct = PM.updateProduct(pid, newProductData);
+        if (!product) {
+            return res.status(404).json({ error: "Producto no encontrado" });
+        }
 
-    if (updatedProduct.error) {
-        return res.status(404).send(updatedProduct);
+        res.json(product);
+    } catch (error) {
+        console.error("Error al obtener el producto:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
-
-    return res.send(updatedProduct);
 });
-routersProducts.delete("/:pid", (req, res) => {
-    const { pid } = req.params;
 
-    const deletedProduct = PM.deleteProduct(pid);
+// Agregar un nuevo producto
+routersProducts.post("/", async (req, res) => {
+    try {
+        const { title, description, code, price, status, category, thumbnail } = req.body;
 
-    if (deletedProduct.error) {
-        return res.status(404).send(deletedProduct);
+        if (!title || !description || !code || !price || !category || !status) {
+            return res.status(400).json({ error: "Todos los campos (excepto imagen) son obligatorios" });
+        }
+
+        const newProduct = {
+            title,
+            description,
+            code,
+            price,
+            status,
+            category,
+            thumbnail: thumbnail ? [thumbnail] : [],
+        };
+
+        const result = await PM.addProduct(newProduct);
+
+        if (!result) {
+            return res.status(500).json({ error: "No se pudo guardar el producto" });
+        }
+
+        res.status(201).json({ message: "Producto guardado correctamente", product: result });
+    } catch (error) {
+        console.error("Error al agregar el producto:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
-    return res.send({
-        Extado:"OK",
-        message: "Producto eliminado correctamente"
-        
-    });
+});
+
+// Actualizar un producto por ID
+routersProducts.put("/:pid", async (req, res) => {
+    try {
+        const { pid } = req.params;
+        const newProductData = req.body;
+
+        const updatedProduct = await PM.updateProduct(pid, newProductData);
+
+        if (!updatedProduct) {
+            return res.status(404).json({ error: "Producto no encontrado o no actualizado" });
+        }
+
+        res.json({ message: "Producto actualizado correctamente", product: updatedProduct });
+    } catch (error) {
+        console.error("Error al actualizar el producto:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+// Eliminar un producto por ID
+routersProducts.delete("/:pid", async (req, res) => {
+    try {
+        const { pid } = req.params;
+        const deletedProduct = await PM.deleteProduct(pid);
+
+        if (!deletedProduct) {
+            return res.status(404).json({ error: "Producto no encontrado o no eliminado" });
+        }
+
+        res.json({ status: "OK", message: "Producto eliminado correctamente" });
+    } catch (error) {
+        console.error("Error al eliminar el producto:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
 });
 
 export default routersProducts;

@@ -1,46 +1,70 @@
 import express from 'express';
-import handlebars from 'express-handlebars'
-import {Server} from 'socket.io'
-import __dirname from './utils.js'
+import handlebars from 'express-handlebars';
+import { Server } from 'socket.io';
+import __dirname from './utils.js';
 import routersProducts from './routes/ProductsRouters.js';
 import routersViews from './routes/viewsRouters.js';
 import ProductManager from './controllers/ProductManager.js';
-
+import mongoose from 'mongoose';
+import cartsRouter from './routes/CartsRouters.js';
 
 const app = express();
 const port = 8080;
 
-const httpServer = app.listen(port,()=>{
-    console.log("sevidor activo,puerto:"+port);
-})
+// Servidor HTTP
+const httpServer = app.listen(port, () => {
+    console.log("Servidor activo en el puerto: " + port);
+});
 
+// Servidor WebSocket
 const socketServer = new Server(httpServer);
 
+// Middlewares
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
-app.use(express.static(__dirname+'/public'));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/public'));
 
-app.engine("handlebars",handlebars.engine())
+// Configuración de Handlebars
+app.engine("handlebars", handlebars.engine());
+app.set('views', __dirname + '/views');
+app.set('view engine', 'handlebars');
 
-app.set('views',__dirname+'/views');
-app.set('view engine','handlebars');
+// Rutas
+app.use("/api/products", routersProducts);
+app.use("/", routersViews);
+app.use("/api/carts",cartsRouter);
+// Instancia de ProductManager
+const PM = new ProductManager();
 
-app.use("/api/products",routersProducts);
-app.use("/",routersViews);
+// Conexión a MongoDB
+mongoose.connect("mongodb+srv://guille1260:123@cluster0.htqik.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    .then(() => console.log("Conectado a MongoDB"))
+    .catch(error => console.error("Error al conectar a MongoDB:", error));
 
-const PM = new ProductManager;
+// WebSockets
+socketServer.on("connection", async (socket) => {
+    console.log("Nuevo cliente conectado");
 
-socketServer.on("connection", socket =>{
-    const products  = PM.getProducts();
-    socket.emit("realTimeProducts",products);
-    socket.on("nuevoProducto",data=>{
-        PM.addProduct(data);
-        const products  = PM.getProducts();
-        socket.emit("realTimeProducts",products);
-    })
-    socket.on("eliminarProducto",data=>{
-        PM.deleteProduct(data);
-        const products  = PM.getProducts();
-        socket.emit("realTimeProducts",products);
-    })
-})
+    try {
+        // Enviar productos al conectar un cliente
+        const products = await PM.getProducts();
+        socket.emit("realTimeProducts", products);
+
+        // Agregar producto
+        socket.on("nuevoProducto", async (data) => {
+            await PM.addProduct(data);
+            const updatedProducts = await PM.getProducts();
+            socketServer.emit("realTimeProducts", updatedProducts); // Enviar a todos
+        });
+
+        // Eliminar producto
+        socket.on("eliminarProducto", async (id) => {
+            await PM.deleteProduct(id);
+            const updatedProducts = await PM.getProducts();
+            socketServer.emit("realTimeProducts", updatedProducts); // Enviar a todos
+        });
+
+    } catch (error) {
+        console.error("Error en WebSockets:", error);
+    }
+});

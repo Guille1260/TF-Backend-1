@@ -3,14 +3,15 @@ import ProductManager from "../controllers/ProductManager.js";
 
 
 const routersViews = Router();
-const PM = new ProductManager;
+const PM = new ProductManager();
 
-routersViews.get("/",(req,res)=>{
-    const a = PM.getProducts();
+routersViews.get("/" , async (req,res)=>{
+    const a = await PM.getProducts();
+    
     res.render("home",{prod:a})
 })
-routersViews.get("/realtimeproducts",(req,res)=>{
-    const a = PM.getProducts();
+routersViews.get("/realtimeproducts",async (req,res)=>{
+    const a = await PM.getProducts();
     res.render("realTimeProducts",{prod:a})
 })
 
