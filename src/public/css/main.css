@@ -71,5 +71,17 @@ body .conteiner-main {
     grid-template-columns: repeat(1, 1fr);
   }
 }
+#home .paginacion {
+  margin: 20px;
+}
+#home .paginacion span {
+  font-size: 20px;
+  color: #DBF227;
+}
+#home .paginacion a {
+  text-decoration: none;
+  font-size: 20px;
+  color: #DBF227;
+}
 
 /*# sourceMappingURL=main.css.map */

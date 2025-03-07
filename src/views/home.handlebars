@@ -2,8 +2,7 @@
 <main class="conteiner-main" id="home">
   <h1>Nuestros productos</h1>
   <section class="conteiner-tarjetas">
-    {{#if prod}}
-      {{#each prod}}
+      {{#each result.payload}}
         <div class="card" style="width: 18rem;">
           <img 
             src="{{#if this.thumbnail}}{{this.thumbnail}}{{else}}/img/default-product.jpg{{/if}}" 
@@ -14,15 +13,31 @@
             <h5 class="card-title">{{this.title}}</h5>
             <p class="card-text">{{this.description}}</p>
             <p class="card-text">Precio: ${{this.price}}</p>
+            <button type="button">añadir al carrito</button>
+            <button type="button">detalles</button>
           </div>
         </div>
       {{/each}}
-    {{else}}
-      <div class="conteiner-info">
-        <h4>Lo sentimos, pero no tenemos productos disponibles</h4>
-      </div>
-    {{/if}}
+      
   </section>
+  {{!-- Corregir el tema de la paginacion --}}
+    <div class="row paginacion">
+        <div class="col text-center">
+          {{#if result.hasPrevPage}}
+            <a href="{{result.prevLink}}">Anterior</a>
+          {{/if}}
+        </div>
+        <div class="col text-center">
+          <span> Página {{result.page}} de {{result.totalPages}} </span>
+        </div>
+        <div class="col text-center">
+          {{#if result.hasNextPage}}
+            <a href="{{result.nextLink}}">Siguiente</a>
+          {{/if}}
+        </div>
+
+    </div>
+
 </main>
 
 

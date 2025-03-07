@@ -1,6 +1,6 @@
 import { Router } from "express";
 import CartManager from "../controllers/CartManager.js";
-
+import { cartModel } from "../model/cart.model.js";
 const cartRouter = Router();
 const CM = new CartManager(); // ✅ Corrección: Instancia con `new`
 
@@ -26,21 +26,43 @@ cartRouter.post("/", async (req, res) => {
 cartRouter.post("/:cid/product/:pid", async (req, res) => {
     const { cid, pid } = req.params;
     const result = await CM.addCartProduct(cid, pid);
-    res.json(result);
+    res.send(result);
 });
 cartRouter.get("/:cid", async (req, res) => {
-    const cid = req.params.cid;  // Obtener el ID del carrito desde los parámetros de la URL
+    const cid = req.params.cid;
+    const cart = await CM.getCartById(cid);
+    res.send(cart)
+});
+
+cartRouter.delete("/:cid/product/:pid", async (req, res) => {
+    const { cid, pid } = req.params;
+    const result = await CM.deleteProductFromCart(cid, pid);
+    res.send({result:result,mensaje:"se elimino el producto del carrito"});
+});
+cartRouter.delete("/:cid", async (req, res) => {
+    const { cid } = req.params; 
     try {
-        const cart = await CM.getCartById(cid);  // Obtener el carrito con ese ID
-        if (cart.error) {
-            res.status(404).json(cart);  // Si no se encuentra el carrito, enviar un error 404
-        } else {
-            res.json(cart);  // Si se encuentra el carrito, enviar los productos del carrito
+        const cart = await cartModel.findById(cid);
+        if (!cart) {
+            return res.status(404).json({ error: "Carrito no encontrado" });
         }
+        cart.products = []; 
+        await cart.save();
+        res.send({ mensaje: "Se eliminaron todos los productos del carrito", cart });
     } catch (error) {
-        console.error("Error al obtener el carrito:", error);
-        res.status(500).json({ error: "Hubo un error al obtener el carrito" });
+        console.error("Error al eliminar los productos del carrito:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
 });
+cartRouter.put("/:cid", async (req, res) => {
+    
+});
+
+cartRouter.put("/:cid/product/:pid", async (req, res) => {
+    
+});
+
+
+
 
 export default cartRouter;

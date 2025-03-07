@@ -3,14 +3,12 @@ const socket = io();
 socket.on("realTimeProducts", data => {
     let contenidoHtml = "";
     let prodId = document.getElementById("product_id");
-
-    // Limpiar opciones previas para evitar duplicados
     prodId.innerHTML = "";
 
     if (data.length === 0) {
         contenidoHtml = '<h4>Lo sentimos, pero no tenemos productos disponibles</h4>';
     } else {
-        data.forEach(item => {
+        data.payload.forEach(item => {
             contenidoHtml += `
                 <div class="card" style="width: 18rem; margin: 10px;">
                     <img src="${item.thumbnail?.[0] || 'default.jpg'}" class="card-img-top" alt="${item.title}">
@@ -21,8 +19,6 @@ socket.on("realTimeProducts", data => {
                     </div>
                 </div>
             `;
-
-            // Agregar opción al select de eliminación
             let option = document.createElement("option");
             option.value = item._id;
             option.textContent = `Producto => ${item.title}, ID => #${item._id}`;

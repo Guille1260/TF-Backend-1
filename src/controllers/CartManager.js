@@ -9,41 +9,49 @@ class CartManager {
         return await cartModel.find().lean();
     }
     async getCartById(id) {
-        return await cartModel.find({_id:id});
+        try {
+            const cart = await cartModel.findOne({ _id: id }).populate("products.product").lean(); 
+            if (!cart) {
+                console.log("Carrito no encontrado");
+                return null;
+            }
+            return cart;
+        } catch (error) {
+            console.error("Error al obtener el carrito:", error);
+            return null;
+        }
     }
+    
     async createCart() {
         await cartModel.create({products:[]});
     }
     async addCartProduct(cid, pid) {
         try {
-            let cart = await cartModel.findById(cid); // 🔹 Buscar el carrito por ID
-
+            let cart = await cartModel.findOne({ _id: cid });
             if (!cart) {
-                return { error: "Carrito no encontrado!" };
+                return {mensaje:"Carrito no encontrado:"};
             }
-
-            // 🔹 Buscar si el producto ya está en el carrito
-            let productIndex = cart.products.findIndex(item => item.product.toString() === pid);
-
+            const productIndex = cart.products.findIndex(p => p.product.toString() === pid);
             if (productIndex !== -1) {
-                // 🔹 Si el producto existe, aumentar la cantidad
                 cart.products[productIndex].quantity += 1;
             } else {
-                // 🔹 Si no existe, agregarlo al carrito
-                cart.products.push({ product: new mongoose.Types.ObjectId(pid), quantity: 1 });
+                cart.products.push({ product: pid, quantity: 1 });
             }
-
-            // 🔹 Marcar el array como modificado para que Mongoose lo guarde correctamente
-            cart.markModified("products");
-
-            await cart.save(); // 🔹 Guardar los cambios en MongoDB
-
-            return { estado: "OK", mensaje: "Producto agregado al carrito!" };
+            await cart.save();
+            return ({mensaje:"Producto agregado al carrito:"});
         } catch (error) {
-            console.error("❌ Error al agregar producto al carrito:", error);
-            return { error: "Error interno al agregar producto" };
+            console.error("Error al agregar producto al carrito:", error);
         }
     }
+    
+
+
+    async deleteProductFromCart(cid, pid) {
+        let cart = await cartModel.findOne({ _id: cid }).lean();
+        let products = cart.products.filter(item=> item._id != pid);
+        await cartModel.updateOne({ _id: cid }, { products: products });
+    }
+    
 }
 
 
