@@ -16,6 +16,8 @@ socket.on("realTimeProducts", data => {
                         <h5 class="card-title">${item.title}</h5>
                         <p class="card-text">${item.description}</p>
                         <p class="card-text"><strong>Precio: $${item.price}</strong></p>
+                        <button type="button" class="btn" on>Añadir al carrito<i class="fa-solid fa-cart-shopping"></i></button>
+                        <a href="/detalles/${item._id}" class="btn btn-primary">Detalles</a>
                     </div>
                 </div>
             `;
@@ -37,8 +39,9 @@ const addProduct = () => {
     const status = document.getElementById("status").value.trim();
     const category = document.getElementById("category").value.trim();
     const thumbnailInput = document.getElementById("thumbnail").value.trim();
+    const stock = parseInt(document.getElementById("stock").value, 10); // Convertir a número
 
-    if (!title || !description || !code || isNaN(price) || !status || !category) {
+    if (!title || !description || !code || isNaN(price) || !status || !category || stock < 0) {
         alert("Todos los campos son requeridos y el precio debe ser un número válido.");
         return;
     }else{
@@ -47,7 +50,7 @@ const addProduct = () => {
 
     const thumbnails = thumbnailInput ? thumbnailInput.split(",").map(url => url.trim()) : [];
 
-    const product = { title, description, code, category, price, status, thumbnail: thumbnails };
+    const product = { title, description, code, category, price, status, thumbnail: thumbnails,stock };
 
     socket.emit("nuevoProducto", product);
     document.getElementById("productForm").reset();
@@ -62,4 +65,7 @@ const deleteProduct = () => {
 
     socket.emit("eliminarProducto", prodId);
 };
-c
+
+const addCart =()=>{
+    console.log("añadir")
+}

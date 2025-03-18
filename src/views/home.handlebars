@@ -13,8 +13,12 @@
             <h5 class="card-title">{{this.title}}</h5>
             <p class="card-text">{{this.description}}</p>
             <p class="card-text">Precio: ${{this.price}}</p>
-            <button type="button">añadir al carrito</button>
-            <button type="button">detalles</button>
+            <p class="card-text">id: {{this._id}}</p>
+            <button type="button" class="btn" onclick=addCart()>
+                            Añadir al carrito <i class="fa-solid fa-cart-shopping"></i>
+            </button>
+            <a href="/detalles/{{this._id}}" class="btn btn-primary">Detalles</a>
+
           </div>
         </div>
       {{/each}}
@@ -39,7 +43,6 @@
     </div>
 
 </main>
-
 
 
 

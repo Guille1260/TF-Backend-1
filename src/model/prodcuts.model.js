@@ -10,6 +10,10 @@ const prodcutSchema = new mongoose.Schema({
     status:Boolean,
     category:String,
     thumbnail:Array,
+    stock: {
+        type: Number,
+        min: 0 // Asegura que el stock no sea negativo
+    },
     carts:{
         type:Array,
         default:[]

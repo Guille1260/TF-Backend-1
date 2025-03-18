@@ -1,0 +1,29 @@
+{{> menu }}
+<main class="conteiner-main" id="detalles">
+    <article class="titulo">
+        <h1 >Detalles del Producto</h1>
+    </article>
+    {{#if producto}}
+        <section class="informacion">
+            <aside class="conteiner-imagen">
+                <img src="{{producto.thumbnail.[0]}}" alt="Imagen de {{producto.title}}" width="300">
+            </aside>
+            <div class="producto-detalle" style="color: #DBF227;">
+                <h2>{{producto.title}}</h2>
+                <p><strong>Descripción:</strong> {{producto.description}}</p>
+                <p><strong>Precio:</strong> ${{producto.price}}</p>
+                <p><strong>Código:</strong> {{producto.code}}</p>
+                <p><strong>Stock disponible:</strong> {{producto.stock}}</p>
+                <p><strong>Categoría:</strong> {{producto.category}}</p>
+                
+                <button type="button" class="btn">Añadir al carrito<i class="fa-solid fa-cart-shopping"></i></button>
+            </div>
+        </section>
+    {{else}}
+        <p style="color: red;">No se encontró el producto.</p>
+    {{/if}}
+</main>
+
+
+
+

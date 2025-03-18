@@ -40,6 +40,11 @@
                     <label for="thumbnail" class="form-label">URL de la Imagen</label>
                     <input  class="form-control" id="thumbnail" name="thumbnail" >
                 </div>
+                <div class="mb-3" require>
+                    <label for="stock" class="form-label">Stock</label>
+                    <input type="number" class="form-control" id="stock" name="stock" required min="0">
+                </div>
+
                 <button type="button" class="btn btn-primary" onclick="addProduct()">Agregar Producto</button>
             </form>
         </div>

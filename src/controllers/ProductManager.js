@@ -23,7 +23,7 @@ class ProductManager {
             }
             result = {
                 status: 'success',
-                payload: result.docs, // Los productos solicitados
+                payload: result.docs, 
                 totalPages: result.totalPages,
                 prevPage: result.prevPage,
                 nextPage: result.nextPage,
@@ -43,22 +43,34 @@ class ProductManager {
         
     }
     async getProductsById(id) {
-            const product = await productModel.find({_id:id});
+            const product = await productModel.find({_id:id}).lean();
             return product ? product : { error: "ID de Producto no encontrado" };
         
     }
-    async addProduct(prod){
-        await productModel.create({...prod});
-    };
+    async addProduct(product) {
+        try {
+            const newProduct = new productModel(product);
+            return await newProduct.save(); 
+        } catch (error) {
+            console.error("Error al guardar el producto:", error);
+            return null; 
+        }
+    }
     async updateProduct(id, newProductData) {
             const updatedProduct = await productModel.findByIdAndUpdate(id, newProductData, { new: true });
             return updatedProduct ? updatedProduct : { error: "Producto no encontrado" };
         
     }
     async deleteProduct(pid) {
-        await productModel.deleteOne({_id:pid});
-    
+        try {
+            const deletedProduct = await productModel.findByIdAndDelete(pid);
+            return deletedProduct; // Retorna el producto eliminado o null si no existe
+        } catch (error) {
+            console.error("Error al eliminar el producto:", error);
+            return null; // Retorna null si hay un error
+        }
     }
+    
     
 }
 

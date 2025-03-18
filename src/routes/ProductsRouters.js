@@ -35,9 +35,9 @@ routersProducts.get("/:id", async (req, res) => {
 // Agregar un nuevo producto
 routersProducts.post("/", async (req, res) => {
     try {
-        const { title, description, code, price, status, category, thumbnail } = req.body;
+        const { title, description, code, price, status, category, thumbnail ,stock} = req.body;
 
-        if (!title || !description || !code || !price || !category || !status) {
+        if (!title || !description || !code || !price || !category || !status ||  !stock ) {
             return res.status(400).json({ error: "Todos los campos (excepto imagen) son obligatorios" });
         }
 
@@ -49,6 +49,7 @@ routersProducts.post("/", async (req, res) => {
             status,
             category,
             thumbnail: thumbnail ? [thumbnail] : [],
+            stock: parseInt(stock, 10)
         };
 
         const result = await PM.addProduct(newProduct);
@@ -69,30 +70,24 @@ routersProducts.put("/:pid", async (req, res) => {
     try {
         const { pid } = req.params;
         const newProductData = req.body;
-
         const updatedProduct = await PM.updateProduct(pid, newProductData);
-
         if (!updatedProduct) {
             return res.status(404).json({ error: "Producto no encontrado o no actualizado" });
         }
-
-        res.json({ message: "Producto actualizado correctamente", product: updatedProduct });
+        res.send({ message: "Producto actualizado correctamente", product: updatedProduct });
     } catch (error) {
         console.error("Error al actualizar el producto:", error);
         res.status(500).json({ error: "Error interno del servidor" });
     }
 });
 
-// Eliminar un producto por ID
 routersProducts.delete("/:pid", async (req, res) => {
     try {
         const { pid } = req.params;
         const deletedProduct = await PM.deleteProduct(pid);
-
         if (!deletedProduct) {
             return res.status(404).json({ error: "Producto no encontrado o no eliminado" });
         }
-
         res.json({ status: "OK", message: "Producto eliminado correctamente" });
     } catch (error) {
         console.error("Error al eliminar el producto:", error);

@@ -6,8 +6,10 @@ class CartManager {
 
     }
     async getCarts(){
-        return await cartModel.find().lean();
+        // Poblar los productos dentro del carrito
+        return await cartModel.find().populate('products.product').lean(); // Se agrega populate
     }
+    
     async getCartById(id) {
         try {
             const cart = await cartModel.findOne({ _id: id }).populate("products.product").lean(); 
@@ -21,7 +23,6 @@ class CartManager {
             return null;
         }
     }
-    
     async createCart() {
         await cartModel.create({products:[]});
     }
@@ -43,8 +44,6 @@ class CartManager {
             console.error("Error al agregar producto al carrito:", error);
         }
     }
-    
-
     async deleteProductFromCart(cid, pid) {
         let cart = await cartModel.findOne({ _id: cid }).lean();
         let products = cart.products.filter(item=> item.product != pid);
@@ -54,13 +53,10 @@ class CartManager {
         await cartModel.updateOne({ _id: cid }, { products: products });
         return { message: "El producto  se elimino  del carrito" };
     }
-    
     async updateCart(cartId, updatedCartData)  {
         try {
-            // Busca y actualiza el carrito por su ID
             const updatedCart = await Cart.findByIdAndUpdate(cartId, updatedCartData, { new: true });
-    
-            return updatedCart; // Devuelve el carrito actualizado o null si no se encontró
+            return updatedCart; 
         } catch (error) {
             console.error("Error al actualizar el carrito:", error);
             throw error;

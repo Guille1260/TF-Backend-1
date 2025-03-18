@@ -76,9 +76,6 @@ cartRouter.put("/:cid", async (req, res) => {
     }
 });
 
-
-
-
 cartRouter.put("/:cid/products/:pid", async (req, res) => {
     const { cid, pid } = req.params;   
     const { quantity } = req.body;     
